@@ -2,10 +2,9 @@ package machinehead.pushitweb.constants
 
 class Constants {
     companion object {
-        const val AUTH_MANAGER_QUALIFIER = "userAuthManagerQualifier"
-
         const val TEST_USER = "test-user"
         const val TEST_ROLE = "TEST_ADMIN"
+        const val UNKNOWN_ROLE = "UNKNOWN_ROLE"
         const val TEST_PASSWORD = "test-password"
 
 

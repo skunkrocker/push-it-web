@@ -1,6 +1,5 @@
 package machinehead.pushitweb.security.config
 
-import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -15,7 +14,11 @@ open class UserAuthenticationManager : AuthenticationManager {
 
     override fun authenticate(authentication: Authentication?): Authentication? {
         return authentication?.let {
-            return@let UsernamePasswordAuthenticationToken(TEST_USER, TEST_PASSWORD, listOf(GrantedAuthority { TEST_ROLE }));
-        } ?: return null
+            val isTestUser = TEST_USER == authentication.principal && TEST_PASSWORD == authentication.credentials
+            if (isTestUser) {
+                return@let UsernamePasswordAuthenticationToken(TEST_USER, TEST_PASSWORD, listOf(GrantedAuthority { TEST_ROLE }));
+            }
+            return@let null
+        }
     }
 }

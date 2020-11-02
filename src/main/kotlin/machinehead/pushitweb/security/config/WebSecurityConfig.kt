@@ -15,19 +15,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 open class WebSecurityConfig(private val jwtRequestFilter: JWTRequestFilter) : WebSecurityConfigurerAdapter() {
     @Throws(Exception::class)
-    override fun configure(inHttp: HttpSecurity) {
-        inHttp
+    override fun configure(http: HttpSecurity) {
+        http
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter::class.java)
-                .authorizeRequests()
-                .antMatchers("/auth")
-                .permitAll()
+                .authorizeRequests().anyRequest().authenticated()
                 .and()
-                .authorizeRequests()
-                .anyRequest()
-                .authenticated()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
     }
 
     override fun configure(web: WebSecurity) {
@@ -37,7 +30,8 @@ open class WebSecurityConfig(private val jwtRequestFilter: JWTRequestFilter) : W
                 "/swagger-resources/**",
                 "/configuration/**",
                 "/swagger-ui.html",
-                "/webjars/**"
+                "/webjars/**",
+                "/auth"
         );
     }
 
