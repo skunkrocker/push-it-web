@@ -1,6 +1,6 @@
 package machinehead.pushitweb.security.filter
 
-import machinehead.pushitweb.security.util.JWTTokenUtil
+import machinehead.pushitweb.service.JWTokenService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
 import org.springframework.security.core.context.SecurityContextHolder
@@ -17,20 +17,19 @@ import org.springframework.beans.factory.annotation.Value
  * Filter for the authorizing request with JWT-Token
  */
 @Component
-class JWTRequestFilter(@Value("\${jwtSecret}") private val jwtSecret: String) : OncePerRequestFilter() {
+class JWTRequestFilter(private val jwTokenService: JWTokenService) : OncePerRequestFilter() {
 
     @Throws(ServletException::class, IOException::class)
     override fun doFilterInternal(httpServletRequest: HttpServletRequest, httpServletResponse: HttpServletResponse, filterChain: FilterChain) {
 
         val header: String? = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION)
 
-        header
-                ?.let { jwt: String? ->
-                    if (JWTTokenUtil.isValid(jwt!!, jwtSecret)) {
-                        SecurityContextHolder.getContext().authentication = JWTTokenUtil.getAuthentication(jwt, jwtSecret)
-                        LOGGER.debug("The authentication for JWT-Token was successful: {} ", jwt)
-                    }
-                } ?: LOGGER.error("There is no JWT-Token in the Authorization header.")
+        header?.let { jwt: String? ->
+            if (jwTokenService.isValid(jwt!!)) {
+                SecurityContextHolder.getContext().authentication = jwTokenService.getAuthentication(jwt)
+                LOGGER.debug("The authentication for JWT-Token was successful: {} ", jwt)
+            }
+        } ?: LOGGER.error("There is no JWT-Token in the Authorization header.")
 
         filterChain.doFilter(httpServletRequest, httpServletResponse)
     }

@@ -1,22 +1,32 @@
-package machinehead.pushitweb.security.util
+package machinehead.pushitweb.service
 
 import io.jsonwebtoken.*
+import io.jsonwebtoken.SignatureAlgorithm.HS256
+import machinehead.pushitweb.constants.Constants.Companion.BEARER
+import machinehead.pushitweb.constants.Constants.Companion.BEARER_INDEX
+import machinehead.pushitweb.constants.Constants.Companion.EMPTY_CREDENTIALS
+import machinehead.pushitweb.constants.Constants.Companion.ROLE
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.stereotype.Service
 import java.security.SignatureException
+import java.util.*
+import javax.crypto.spec.SecretKeySpec
+import javax.xml.bind.DatatypeConverter
+import kotlin.collections.HashMap
 
-object JWTTokenUtil {
-    private const val ROLE = "role"
-    private const val BEARER = "Bearer "
-    private const val BEARER_INDEX = 7
-    private const val EMPTY_CREDENTIALS = ""
+@Service
+class JWTokenService(@Value("\${jwtSecret}") val jwtSecret: String) {
+    companion object {
+        val LOGGER: Logger = LoggerFactory.getLogger(JWTokenService::class.java)
+    }
 
-    private val LOGGER = LoggerFactory.getLogger(JWTTokenUtil::class.java)
-
-    fun getAuthentication(jwtToken: String, jwtSecret: String?): UsernamePasswordAuthenticationToken {
+    fun getAuthentication(jwtToken: String): UsernamePasswordAuthenticationToken {
 
         val jwtTokenWithoutBearer = removeBearerPrefix(jwtToken)
 
@@ -41,12 +51,35 @@ object JWTTokenUtil {
         }
     }
 
-    fun isValid(inJWTToken: String, inJWTSecret: String?): Boolean {
+    fun generateToken(username: String?, role: String?, expiration: Int): String? {
+
+        val now = Date(System.currentTimeMillis())
+
+        val apiKeySecretBytes: ByteArray = DatatypeConverter.parseBase64Binary(jwtSecret)
+        val signingKey = SecretKeySpec(apiKeySecretBytes, HS256.jcaName)
+        val expiryDate = Date(now.time + expiration)
+
+        val map = HashMap<String, Any>()
+        map[Header.TYPE] = Header.JWT_TYPE
+
+        return Jwts.builder()
+                .setHeader(map)
+                .setId(UUID.randomUUID().toString())
+                .claim("role", role)
+                .setSubject(username)
+                .setIssuedAt(now)
+                .setIssuer("test-app")
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, signingKey)
+                .compact()
+    }
+
+    fun isValid(jwtToken: String ): Boolean {
         try {
-            val token = removeBearerPrefix(inJWTToken)
+            val token = removeBearerPrefix(jwtToken)
             Jwts
                     .parser()
-                    .setSigningKey(inJWTSecret)
+                    .setSigningKey(jwtSecret)
                     .parseClaimsJws(token)
             return true
         } catch (ex: SignatureException) {

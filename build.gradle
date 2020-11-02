@@ -31,6 +31,22 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-web'
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    //Faster xml
+    compile "com.fasterxml.jackson.core:jackson-core:2.10.2"
+    compile "com.fasterxml.jackson.core:jackson-databind:2.10.2"
+    compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.10.2"
+    compile "com.fasterxml.jackson.core:jackson-annotations:2.10.2"
+    compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.10.2"
+
+    //Swagger
+    compile 'io.springfox:springfox-swagger2:2.9.2'
+    compile 'io.springfox:springfox-swagger-ui:2.9.2'
+
+    //JAVAX fix for Java 11
+    compile 'javax.xml.bind:jaxb-api:2.3.0'
+    compile 'com.sun.xml.bind:jaxb-core:2.3.0'
+    compile 'com.sun.xml.bind:jaxb-impl:2.3.0'
+
     //JWT
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
     //Kotlin

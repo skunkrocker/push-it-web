@@ -1,9 +1,9 @@
 package machinehead.pushitweb.security.config
 
 import machinehead.pushitweb.security.filter.JWTRequestFilter
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
@@ -13,11 +13,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-open class WebSecurityConfig(@Value("\${jwtSecret}") private val jwtSecret: String) : WebSecurityConfigurerAdapter() {
+open class WebSecurityConfig(private val jwtRequestFilter: JWTRequestFilter) : WebSecurityConfigurerAdapter() {
     @Throws(Exception::class)
     override fun configure(inHttp: HttpSecurity) {
         inHttp
-                .addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter::class.java)
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter::class.java)
+                .authorizeRequests()
+                .antMatchers("/auth")
+                .permitAll()
+                .and()
                 .authorizeRequests()
                 .anyRequest()
                 .authenticated()
@@ -27,22 +31,20 @@ open class WebSecurityConfig(@Value("\${jwtSecret}") private val jwtSecret: Stri
     }
 
     override fun configure(web: WebSecurity) {
-        web.ignoring().mvcMatchers(*AUTH_WHITELIST)
+        web.ignoring().antMatchers(
+                "/v2/api-docs",
+                "/configuration/ui",
+                "/swagger-resources/**",
+                "/configuration/**",
+                "/swagger-ui.html",
+                "/webjars/**"
+        );
     }
 
-    companion object {
-        private val AUTH_WHITELIST = arrayOf(
-                "/webjars/**",
-                "/v2/api-docs",
-                "/admin/check",
-                "/actuator/**",
-                "/swagger-ui.html",
-                "/swagger-resources/**"
-        )
-    }
 
     @Bean
-    open fun jwtRequestFilter(): JWTRequestFilter {
-        return JWTRequestFilter(jwtSecret)
+    @Throws(java.lang.Exception::class)
+    override fun authenticationManagerBean(): AuthenticationManager? {
+        return UserAuthenticationManager()
     }
 }
