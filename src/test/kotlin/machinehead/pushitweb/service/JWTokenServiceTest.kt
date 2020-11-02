@@ -8,6 +8,7 @@ import io.jsonwebtoken.SignatureAlgorithm.HS512
 import machinehead.pushitweb.constants.Constants.Companion.TEST_APP
 import machinehead.pushitweb.constants.Constants.Companion.TEST_ROLE
 import machinehead.pushitweb.constants.Constants.Companion.TEST_USER
+import machinehead.pushitweb.constants.Constants.Companion.UNKNOWN_ROLE
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -32,7 +33,7 @@ open class JWTokenServiceTest {
     lateinit var jwTokenService: JWTokenService
 
     @Test
-    fun jwtValidated_Authorization_IsValid() {
+    fun getAuthentication_AuthorizationIsValid() {
         val testToken = generateTestToken()
         val authentication = jwTokenService.getAuthentication(testToken)
 
@@ -48,25 +49,41 @@ open class JWTokenServiceTest {
         assertThat(user.username).isEqualTo(TEST_USER)
     }
 
+    @Test
+    fun getAuthentication_NoRole_AuthorizationIsValid_UnknownRole() {
+        val testToken = generateTestToken(role = null)
+        val authentication = jwTokenService.getAuthentication(testToken)
+
+        val authority = authentication.authorities
+                .stream()
+                .findAny()
+                .map { it.authority }
+                .orElse(null)
+
+        val user = authentication.principal as User
+
+        assertThat(authority).isEqualTo(UNKNOWN_ROLE)
+        assertThat(user.username).isEqualTo(TEST_USER)
+    }
 
     @Test
-    fun jwtValidated_ItIsValid() {
+    fun isNotExpired_ItIsNotExpired() {
         val testToken = generateTestToken()
 
-        val isValid = jwTokenService.isValid(testToken)
+        val isValid = jwTokenService.isNotExpired(testToken)
         assertThat(isValid).isTrue()
     }
 
 
     @Test
-    fun jwtValidated_ItIsNotValid() {
+    fun isNotExpired_ItIsExpired() {
         val testToken = generateTestToken(now = dateDaysAgo(10), expired = 0)
 
-        val isValid = jwTokenService.isValid(testToken)
+        val isValid = jwTokenService.isNotExpired(testToken)
         assertThat(isValid).isFalse()
     }
 
-    private fun generateTestToken(now: Date = Date(), expired: Int = 999999999): String {
+    private fun generateTestToken(role: String? = TEST_ROLE, now: Date = Date(), expired: Int = 999999999): String {
 
         val apiKeySecretBytes: ByteArray = DatatypeConverter.parseBase64Binary(jwtSecret)
         val signingKey = SecretKeySpec(apiKeySecretBytes, HS256.jcaName)
@@ -78,7 +95,7 @@ open class JWTokenServiceTest {
         return Jwts.builder()
                 .setHeader(map)
                 .setId(UUID.randomUUID().toString())
-                .claim("role", TEST_ROLE)
+                .claim("role", role)
                 .setSubject(TEST_USER)
                 .setIssuedAt(now)
                 .setIssuer(TEST_APP)

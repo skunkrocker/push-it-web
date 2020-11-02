@@ -8,6 +8,7 @@ import machinehead.pushitweb.constants.Constants.Companion.BEARER
 import machinehead.pushitweb.constants.Constants.Companion.BEARER_INDEX
 import machinehead.pushitweb.constants.Constants.Companion.EMPTY_CREDENTIALS
 import machinehead.pushitweb.constants.Constants.Companion.ROLE
+import machinehead.pushitweb.constants.Constants.Companion.UNKNOWN_ROLE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -41,17 +42,17 @@ class JWTokenService(@Value("\${jwtSecret}") val jwtSecret: String) {
         val claims: Claims = claimsJws.body
         val userName: String = claims.subject
 
-        return when (claims[ROLE]) {
+        val grantedAuthority = when (claims[ROLE]) {
             null -> {
-                val userDetails: UserDetails = User(userName, EMPTY_CREDENTIALS, emptyList())
-                UsernamePasswordAuthenticationToken(userDetails, EMPTY_CREDENTIALS, emptyList())
+                listOf(SimpleGrantedAuthority(UNKNOWN_ROLE))
             }
             else -> {
-                val simpleGrantedAuthority = listOf(SimpleGrantedAuthority(claims[ROLE].toString()))
-                val userDetails: UserDetails = User(userName, EMPTY_CREDENTIALS, simpleGrantedAuthority)
-                UsernamePasswordAuthenticationToken(userDetails, EMPTY_CREDENTIALS, simpleGrantedAuthority)
+                listOf(SimpleGrantedAuthority(claims[ROLE].toString()))
             }
         }
+
+        val userDetails: UserDetails = User(userName, EMPTY_CREDENTIALS, grantedAuthority)
+        return UsernamePasswordAuthenticationToken(userDetails, EMPTY_CREDENTIALS, grantedAuthority)
     }
 
     fun generateToken(username: String?, role: String?, expiration: Int): String? {
@@ -77,7 +78,7 @@ class JWTokenService(@Value("\${jwtSecret}") val jwtSecret: String) {
                 .compact()
     }
 
-    fun isValid(jwtToken: String): Boolean {
+    fun isNotExpired(jwtToken: String): Boolean {
         try {
             val token = removeBearerPrefix(jwtToken)
             val claims = Jwts

@@ -11,7 +11,6 @@ import javax.servlet.FilterChain
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
-import org.springframework.beans.factory.annotation.Value
 
 /**
  * Filter for the authorizing request with JWT-Token
@@ -25,7 +24,7 @@ class JWTRequestFilter(private val jwTokenService: JWTokenService) : OncePerRequ
         val header: String? = httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION)
 
         header?.let { jwt: String? ->
-            if (jwTokenService.isValid(jwt!!)) {
+            if (jwTokenService.isNotExpired(jwt!!)) {
                 SecurityContextHolder.getContext().authentication = jwTokenService.getAuthentication(jwt)
                 LOGGER.debug("The authentication for JWT-Token was successful: {} ", jwt)
             }
