@@ -34,7 +34,7 @@ open class JWTController(private val jwTokenService: JWTokenService, private val
 
             val token = jwTokenService.generateToken(authUser.principal.toString(), authority, 999999999)
 
-            return ResponseEntity.ok(JWTApiResponse(token!!))
+            return ResponseEntity.ok(JWTApiResponse(accessToken = token!!))
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build()
     }
