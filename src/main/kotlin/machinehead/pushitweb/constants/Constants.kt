@@ -6,6 +6,7 @@ class Constants {
         const val TEST_ROLE = "TEST_ADMIN"
         const val UNKNOWN_ROLE = "UNKNOWN_ROLE"
         const val TEST_PASSWORD = "test-password"
+        const val TEST_APP = "test-app"
 
 
         const val ROLE = "role"

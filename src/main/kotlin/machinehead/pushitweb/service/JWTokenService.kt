@@ -1,7 +1,9 @@
 package machinehead.pushitweb.service
 
 import io.jsonwebtoken.*
+import io.jsonwebtoken.Header.JWT_TYPE
 import io.jsonwebtoken.SignatureAlgorithm.HS256
+import io.jsonwebtoken.SignatureAlgorithm.HS512
 import machinehead.pushitweb.constants.Constants.Companion.BEARER
 import machinehead.pushitweb.constants.Constants.Companion.BEARER_INDEX
 import machinehead.pushitweb.constants.Constants.Companion.EMPTY_CREDENTIALS
@@ -9,6 +11,7 @@ import machinehead.pushitweb.constants.Constants.Companion.ROLE
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
@@ -60,7 +63,7 @@ class JWTokenService(@Value("\${jwtSecret}") val jwtSecret: String) {
         val expiryDate = Date(now.time + expiration)
 
         val map = HashMap<String, Any>()
-        map[Header.TYPE] = Header.JWT_TYPE
+        map[Header.TYPE] = JWT_TYPE
 
         return Jwts.builder()
                 .setHeader(map)
@@ -70,18 +73,22 @@ class JWTokenService(@Value("\${jwtSecret}") val jwtSecret: String) {
                 .setIssuedAt(now)
                 .setIssuer("test-app")
                 .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS512, signingKey)
+                .signWith(HS512, signingKey)
                 .compact()
     }
 
-    fun isValid(jwtToken: String ): Boolean {
+    fun isValid(jwtToken: String): Boolean {
         try {
             val token = removeBearerPrefix(jwtToken)
-            Jwts
+            val claims = Jwts
                     .parser()
                     .setSigningKey(jwtSecret)
                     .parseClaimsJws(token)
-            return true
+
+            return !claims
+                    .body
+                    .expiration
+                    .before(Date(System.currentTimeMillis()))
         } catch (ex: SignatureException) {
             LOGGER.error("Invalid JWT signature")
         } catch (ex: MalformedJwtException) {
