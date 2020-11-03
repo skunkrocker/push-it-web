@@ -25,7 +25,7 @@ import javax.xml.bind.DatatypeConverter
 import kotlin.collections.HashMap
 
 @Service
-class JWTokenService(@Value("\${jwtSecret}") val jwtSecret: String) {
+open class JWTokenService(@Value("\${jwtSecret}") var jwtSecret: String) {
     companion object {
         val LOGGER: Logger = LoggerFactory.getLogger(JWTokenService::class.java)
     }
