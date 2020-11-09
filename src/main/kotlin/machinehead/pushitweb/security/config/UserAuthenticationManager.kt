@@ -17,6 +17,7 @@ open class UserAuthenticationManager(private val pushUserRepository: PushUserRep
 
         return authentication?.principal.let { userName ->
             val findByUserName = pushUserRepository.findByUserName(userName.toString())
+            //TODO password validation needed
             if (TEST_PASSWORD == findByUserName?.password) {
                 return@let UsernamePasswordAuthenticationToken(TEST_USER, TEST_PASSWORD, listOf(GrantedAuthority { TEST_ROLE }));
             }
