@@ -1,5 +1,6 @@
 package machinehead.pushitweb.security.config
 
+import machinehead.pushitweb.repositories.PushUserRepository
 import machinehead.pushitweb.security.filter.JWTRequestFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,7 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-open class WebSecurityConfig(private val jwtRequestFilter: JWTRequestFilter) : WebSecurityConfigurerAdapter() {
+open class WebSecurityConfig(private val jwtRequestFilter: JWTRequestFilter, private val pushUserRepository: PushUserRepository) : WebSecurityConfigurerAdapter() {
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http
@@ -30,6 +31,7 @@ open class WebSecurityConfig(private val jwtRequestFilter: JWTRequestFilter) : W
                 "/swagger-resources/**",
                 "/configuration/**",
                 "/swagger-ui.html",
+                "/h2",
                 "/webjars/**",
                 "/auth"
         );
@@ -39,6 +41,6 @@ open class WebSecurityConfig(private val jwtRequestFilter: JWTRequestFilter) : W
     @Bean
     @Throws(java.lang.Exception::class)
     override fun authenticationManagerBean(): AuthenticationManager? {
-        return UserAuthenticationManager()
+        return UserAuthenticationManager(pushUserRepository)
     }
 }
