@@ -3,3 +3,24 @@ server:
   port: 8090
   servlet:
     context-path: /push-it
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2
+  datasource:
+    url: jdbc:h2:file:~/push_it_db
+    driverClassName: org.h2.Driver
+    username: sa
+    password: sa
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    generate-ddl: true
+  flyway:
+    url: jdbc:h2:file:~/push_it_db
+    user: sa
+    password: sa
+    locations: classpath:db/migration/
