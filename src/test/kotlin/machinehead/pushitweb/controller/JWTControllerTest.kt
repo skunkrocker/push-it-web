@@ -105,7 +105,7 @@ internal class JWTControllerTest {
     }
 
     @Test
-    fun `authentication with password is empty and can't then return bad request`() {
+    fun `authentication with password is empty and returns bad request`() {
         mvc
                 .perform(postServletRequest(JWTApiRequest(TEST_USER, "")))
                 .andExpect(status().isBadRequest)

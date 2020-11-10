@@ -43,7 +43,7 @@ internal class JWTRequestFilterTest {
     lateinit var httpServletRequest: HttpServletRequest
 
     @Test
-    fun jwtFilter_TokenInAuthHeader_Authenticated() {
+    fun `call controller with valid authentication request and assert security context authenticated`() {
 
         val token = jwTokenService.generateToken(TEST_USER, TEST_ROLE, 999999999)
 
@@ -67,7 +67,7 @@ internal class JWTRequestFilterTest {
 
 
     @Test
-    fun jwtFilter_NoTokenInAuthHeader_NotAuthenticated() {
+    fun `no auth header assert no security context is set`() {
         given(httpServletRequest.getHeader(HttpHeaders.AUTHORIZATION))
                 .willReturn(null)
 

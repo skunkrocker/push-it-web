@@ -25,7 +25,7 @@ open class JWTokenServiceTest {
     lateinit var jwTokenService: JWTokenService
 
     @Test
-    fun getAuthentication_AuthorizationIsValid() {
+    fun `the token service evaluates jwt-token and returns the right authentication object`() {
         val testToken = generateTestToken(jwtSecret = jwtSecret)
         val authentication = jwTokenService.getAuthentication(testToken)
 
@@ -42,7 +42,7 @@ open class JWTokenServiceTest {
     }
 
     @Test
-    fun getAuthentication_NoRole_AuthorizationIsValid_UnknownRole() {
+    fun `when the jwt-token user has no role the authentication object contains unknown_role`() {
         val testToken = generateTestToken(role = null, jwtSecret = jwtSecret)
         val authentication = jwTokenService.getAuthentication(testToken)
 
@@ -59,7 +59,7 @@ open class JWTokenServiceTest {
     }
 
     @Test
-    fun isNotExpired_ItIsNotExpired() {
+    fun `if it is not expired token the token is valid`() {
         val testToken = generateTestToken(jwtSecret = jwtSecret)
 
         val isValid = jwTokenService.isNotExpired(testToken)
@@ -67,7 +67,7 @@ open class JWTokenServiceTest {
     }
 
     @Test
-    fun isNotExpired_ItIsExpired() {
+    fun `if it is expired token then it is not valid`() {
         val testToken = generateTestToken(now = dateDaysAgo(10), expired = 0, jwtSecret = jwtSecret)
 
         val isValid = jwTokenService.isNotExpired(testToken)
