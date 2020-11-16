@@ -1,8 +1,8 @@
 package machinehead.pushitweb.controller
 
 import machinehead.pushitweb.constants.Constants
-import machinehead.pushitweb.model.api.JWTApiRequest
-import machinehead.pushitweb.model.api.JWTApiResponse
+import machinehead.pushitweb.model.JWTApiRequest
+import machinehead.pushitweb.model.JWTApiResponse
 import machinehead.pushitweb.service.JWTokenService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

@@ -11,16 +11,14 @@ import org.springframework.security.core.GrantedAuthority
 
 open class UserAuthenticationManager(private val pushUserRepository: PushUserRepository) : AuthenticationManager {
 
-
     override fun authenticate(authentication: Authentication?): Authentication? {
 
         return authentication?.principal.let { userName ->
             val findByUserName = pushUserRepository.findByUserName(userName.toString())
-            //TODO password validation needed
-            if (TEST_PASSWORD == findByUserName?.password) {
-                return@let UsernamePasswordAuthenticationToken(TEST_USER, TEST_PASSWORD, listOf(GrantedAuthority { TEST_ROLE }));
+
+            return findByUserName.let { user ->
+                return@let UsernamePasswordAuthenticationToken(user?.userName, user?.password, listOf(GrantedAuthority { user?.role }));
             }
-            return@let null
         }
     }
 }
