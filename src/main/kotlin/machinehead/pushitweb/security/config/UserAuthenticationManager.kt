@@ -1,8 +1,5 @@
 package machinehead.pushitweb.security.config
 
-import machinehead.pushitweb.constants.Constants.Companion.TEST_PASSWORD
-import machinehead.pushitweb.constants.Constants.Companion.TEST_ROLE
-import machinehead.pushitweb.constants.Constants.Companion.TEST_USER
 import machinehead.pushitweb.repositories.PushUserRepository
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -16,7 +13,7 @@ open class UserAuthenticationManager(private val pushUserRepository: PushUserRep
         return authentication?.principal.let { userName ->
             val findByUserName = pushUserRepository.findByUserName(userName.toString())
 
-            return findByUserName.let { user ->
+            return@let findByUserName.let { user ->
                 return@let UsernamePasswordAuthenticationToken(user?.userName, user?.password, listOf(GrantedAuthority { user?.role }));
             }
         }
