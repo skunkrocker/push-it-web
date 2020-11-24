@@ -1,11 +1,15 @@
 package machinehead.pushitweb.service
 
+import machinehead.pushitweb.constants.Constants.Companion.TEST_APP
+import machinehead.pushitweb.constants.Constants.Companion.TEST_PASSWORD
 import machinehead.pushitweb.entities.Application
 import machinehead.pushitweb.repositories.ApplicationRepository
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
+import org.mockito.BDDMockito.given
 import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -31,18 +35,17 @@ class CertificateServiceTest {
         val certificateFile = ClassPathResource("/cert/myKeystore.p12");
         val myKeyStore = MockMultipartFile(certificateFile.filename!!, certificateFile.filename!!, "application/x-pkcs12", certificateFile.inputStream)
 
-        val testPass = "password"
-        val testApp = "test-app-name"
+
         val encodedCertificate = Base64.getEncoder().encodeToString(myKeyStore.bytes)
 
-        certificateService.saveCertificate(testApp, testPass, myKeyStore)
+        certificateService.saveCertificate(TEST_APP, TEST_PASSWORD, myKeyStore)
 
         val argumentCaptor = ArgumentCaptor.forClass(Application::class.java)
 
         verify(applicationRepository, atLeastOnce()).save(argumentCaptor.capture())
 
-        assertThat(testApp).isEqualTo(argumentCaptor.value.appName)
-        assertThat(testPass).isEqualTo(argumentCaptor.value.certPass)
+        assertThat(TEST_APP).isEqualTo(argumentCaptor.value.appName)
+        assertThat(TEST_PASSWORD).isEqualTo(argumentCaptor.value.certPass)
         assertThat(encodedCertificate).isEqualTo(argumentCaptor.value.certificate)
     }
 
@@ -54,7 +57,7 @@ class CertificateServiceTest {
         val message = "The content type of the file is not supported: %s. At the moment only application/x-pkcs12 certificates are supported."
                 .format(myKeyStore.contentType)
 
-        Assertions.assertThatThrownBy {
+        assertThatThrownBy {
             certificateService.saveCertificate("test-app", "password", myKeyStore)
         }
                 .isInstanceOf(IllegalArgumentException::class.java)
@@ -73,7 +76,7 @@ class CertificateServiceTest {
         val message = "The appName is blank: %s, password is blank: %s,  certificate file is empty: %s".format(appName.isBlank(), password.isBlank(), myKeyStore.isEmpty)
 
 
-        Assertions.assertThatThrownBy {
+        assertThatThrownBy {
             certificateService.saveCertificate(appName, password, myKeyStore)
         }
                 .isInstanceOf(IllegalArgumentException::class.java)
@@ -91,7 +94,7 @@ class CertificateServiceTest {
         val message = "The appName is blank: %s, password is blank: %s,  certificate file is empty: %s".format(appName.isBlank(), password.isBlank(), myKeyStore.isEmpty)
 
 
-        Assertions.assertThatThrownBy {
+        assertThatThrownBy {
             certificateService.saveCertificate(appName, password, myKeyStore)
         }
                 .isInstanceOf(IllegalArgumentException::class.java)
@@ -109,7 +112,7 @@ class CertificateServiceTest {
         val message = "The appName is blank: %s, password is blank: %s,  certificate file is empty: %s".format(appName.isBlank(), password.isBlank(), myKeyStore.isEmpty)
 
 
-        Assertions.assertThatThrownBy {
+        assertThatThrownBy {
             certificateService.saveCertificate(appName, password, myKeyStore)
         }
                 .isInstanceOf(IllegalArgumentException::class.java)
@@ -125,11 +128,14 @@ class CertificateServiceTest {
         val appName = "test-app"
         val password = "password"
 
-        doThrow(DataIntegrityViolationException("some message")).`when`(applicationRepository).save(any())
+        given(applicationRepository.save(any(Application::class.java)))
+                .willThrow(DataIntegrityViolationException("some message"))
+
+        //doThrow(DataIntegrityViolationException("some message")).`when`(applicationRepository).save(any())
 
         val message = "The app with the name: %s already exists.".format(appName)
 
-        Assertions.assertThatThrownBy {
+        assertThatThrownBy {
             certificateService.saveCertificate(appName, password, myKeyStore)
         }
                 .isInstanceOf(IllegalArgumentException::class.java)

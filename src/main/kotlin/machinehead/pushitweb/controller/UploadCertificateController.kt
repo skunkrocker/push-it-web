@@ -16,11 +16,11 @@ open class UploadCertificateController(private val certificateService: Certifica
 
     private val LOGGER: Logger = LoggerFactory.getLogger(UploadCertificateController::class.java)
 
-    @PostMapping(value = ["upload/certificate"])
+    @PostMapping(value = ["/certificate"])
     fun uploadCertificate(
-            @RequestParam("App name") appName: String,
-            @RequestParam("Certificate password") certificatePassword: String,
-            @RequestParam("P12 certificate file") certificateFile: MultipartFile,
+            @RequestHeader("app-name") appName: String,
+            @RequestHeader("password") certificatePassword: String,
+            @RequestParam("p12") certificateFile: MultipartFile,
             @RequestHeader("Authorization") authorization: String
     ): ResponseEntity<CertificateUploadApiResponse> {
 

@@ -1,9 +1,7 @@
 package machinehead.pushitweb.controller
 
-import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.SerializationFeature.WRAP_ROOT_VALUE
 import machinehead.pushitweb.constants.Constants
 import machinehead.pushitweb.constants.Constants.Companion.BEARER

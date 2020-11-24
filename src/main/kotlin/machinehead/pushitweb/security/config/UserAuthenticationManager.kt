@@ -15,7 +15,7 @@ open class UserAuthenticationManager(private val pushUserRepository: PushUserRep
             val findByUserName = pushUserRepository.findByUserName(userName.toString())
 
             return@let findByUserName?.let { user ->
-                return@let UsernamePasswordAuthenticationToken(user.userName, user.password, listOf(GrantedAuthority { user.role }));
+                return UsernamePasswordAuthenticationToken(user.userName, user.password, listOf(GrantedAuthority { user.role }));
             }
         }
     }
