@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import machinehead.pushitweb.constants.Constants.Companion.TEST_APP
 import machinehead.pushitweb.constants.Constants.Companion.TEST_PASSWORD
 import machinehead.pushitweb.entities.Application
+import machinehead.pushitweb.exception.ApiError
 import machinehead.pushitweb.model.CertificateUploadApiResponse
 import machinehead.pushitweb.repositories.ApplicationRepository
 import machinehead.pushitweb.repositories.PushUserRepository
@@ -93,6 +94,31 @@ internal class UploadCertificateControllerTest {
         assertThat(TEST_APP).isEqualTo(argumentCaptor.value.appName)
         assertThat(TEST_PASSWORD).isEqualTo(argumentCaptor.value.certPass)
         assertThat(encodedCertificate).isEqualTo(argumentCaptor.value.certificate)
+    }
+
+
+    @Test
+    fun `upload certificate for invalid app name ends with bad request`() {
+
+        val token = TokenUtil.generateTestToken()
+
+        val certificateFile = ClassPathResource("/cert/myKeystore.p12")
+        val myKeyStore = MockMultipartFile("p12", certificateFile.filename!!, "application/x-pkcs12", certificateFile.inputStream)
+
+        val postMultipart = mockHttpServletRequestBuilder(myKeyStore, token, "", TEST_PASSWORD)
+
+        val result = mvc.perform(postMultipart)
+                .andExpect(status().isBadRequest)
+                .andReturn()
+
+        assertThat(result).isNotNull
+
+        val message = "The appName is blank: %s, password is blank: %s,  certificate file is empty: %s".format("".isBlank(), TEST_PASSWORD.isBlank(), myKeyStore.isEmpty)
+        val bodyResponse = objectMapper.readValue(result.response.contentAsString, ApiError::class.java)
+
+        assertThat(bodyResponse.message).isEqualTo(message)
+
+        verify(applicationRepository, never()).save(any())
     }
 
     private fun mockHttpServletRequestBuilder(myKeyStore: MockMultipartFile, token: String, appName: String, password: String): MockHttpServletRequestBuilder {
