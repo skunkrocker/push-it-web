@@ -22,6 +22,9 @@ open class WebSecurityConfig(private val jwtRequestFilter: JWTRequestFilter, pri
                 .authorizeRequests().anyRequest().authenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        http
+                .cors().disable()
+                .csrf().disable();
     }
 
     override fun configure(web: WebSecurity) {

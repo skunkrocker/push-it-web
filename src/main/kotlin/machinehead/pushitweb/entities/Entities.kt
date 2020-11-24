@@ -10,3 +10,12 @@ open class PushUser(
         open var password: String,
         @Id @GeneratedValue open var id: Long? = null
 )
+
+@Entity
+@Table(name = "application", schema = "public")
+open class Application(
+        open var appName: String,
+        open var certPass: String,
+        open var certificate: String,
+        @Id @GeneratedValue open var id: Long? = null
+)
