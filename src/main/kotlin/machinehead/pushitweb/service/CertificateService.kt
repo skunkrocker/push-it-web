@@ -10,7 +10,7 @@ import machinehead.pushitweb.repositories.ApplicationRepository
 import org.springframework.dao.DataIntegrityViolationException
 
 @Service
-class CertificateService(private val applicationRepository: ApplicationRepository) {
+open class CertificateService(private val applicationRepository: ApplicationRepository) {
 
     private val logger by logger()
 
