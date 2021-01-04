@@ -1,5 +1,6 @@
 package machinehead.pushitweb.controller
 
+import machinehead.pushitweb.logger
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -14,19 +15,19 @@ import machinehead.pushitweb.model.CertificateUploadApiResponse
 @Controller
 open class UploadCertificateController(private val certificateService: CertificateService) {
 
-    private val LOGGER: Logger = LoggerFactory.getLogger(UploadCertificateController::class.java)
+    private val logger by logger()
 
     @PostMapping(value = ["/certificate"])
     fun uploadCertificate(
-            @RequestHeader("app-name") appName: String,
-            @RequestHeader("password") certificatePassword: String,
-            @RequestParam("p12") certificateFile: MultipartFile,
-            @RequestHeader("Authorization") authorization: String
+        @RequestHeader("app-name") appName: String,
+        @RequestHeader("password") certificatePassword: String,
+        @RequestParam("p12") certificateFile: MultipartFile,
+        @RequestHeader("Authorization") authorization: String
     ): ResponseEntity<CertificateUploadApiResponse> {
 
         val theAppName = certificateService.saveCertificate(appName, certificatePassword, certificateFile)
 
-        LOGGER.debug("The certificate was saved for the app name: {}", theAppName)
+        logger.debug("The certificate was saved for the app name: {}", theAppName)
 
         return ResponseEntity.ok(CertificateUploadApiResponse(theAppName))
     }

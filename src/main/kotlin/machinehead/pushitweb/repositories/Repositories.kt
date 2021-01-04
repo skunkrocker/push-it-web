@@ -17,4 +17,5 @@ interface PushUserRepository : JpaRepository<PushUser, Long> {
 @Transactional
 interface ApplicationRepository : JpaRepository<Application, Long> {
 
+    fun findByAppName(appName: String): Application?
 }
