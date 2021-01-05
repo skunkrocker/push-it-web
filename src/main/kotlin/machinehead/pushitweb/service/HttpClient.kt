@@ -1,9 +1,8 @@
 package machinehead.pushitweb.service
 
 import machinehead.pushitweb.logger
-import machinehead.pushitweb.repositories.ApplicationRepository
+import machinehead.pushitweb.repository.ApplicationRepository
 import okhttp3.OkHttpClient
-import org.hibernate.exception.JDBCConnectionException
 import org.springframework.stereotype.Service
 import java.lang.IllegalStateException
 import java.security.KeyStore

@@ -1,6 +1,6 @@
 package machinehead.pushitweb.security.config
 
-import machinehead.pushitweb.repositories.PushUserRepository
+import machinehead.pushitweb.repository.PushUserRepository
 import machinehead.pushitweb.security.filter.JWTRequestFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -24,7 +24,7 @@ open class WebSecurityConfig(private val jwtRequestFilter: JWTRequestFilter, pri
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         http
                 .cors().disable()
-                .csrf().disable();
+                .csrf().disable()
     }
 
     override fun configure(web: WebSecurity) {
@@ -37,7 +37,7 @@ open class WebSecurityConfig(private val jwtRequestFilter: JWTRequestFilter, pri
                 "/h2",
                 "/webjars/**",
                 "/auth"
-        );
+        )
     }
 
 

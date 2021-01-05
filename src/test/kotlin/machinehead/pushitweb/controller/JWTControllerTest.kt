@@ -7,10 +7,10 @@ import machinehead.pushitweb.constants.Constants
 import machinehead.pushitweb.constants.Constants.Companion.BEARER
 import machinehead.pushitweb.constants.Constants.Companion.TEST_PASSWORD
 import machinehead.pushitweb.constants.Constants.Companion.TEST_USER
-import machinehead.pushitweb.entities.PushUser
+import machinehead.pushitweb.entity.PushUser
 import machinehead.pushitweb.model.JWTApiRequest
 import machinehead.pushitweb.model.JWTApiResponse
-import machinehead.pushitweb.repositories.PushUserRepository
+import machinehead.pushitweb.repository.PushUserRepository
 import machinehead.pushitweb.service.JWTokenService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -55,7 +55,7 @@ internal class JWTControllerTest {
 
         mvc = MockMvcBuilders
                 .webAppContextSetup(webApplicationContext)
-                .build();
+                .build()
 
         objectMapper
                 .configure(WRAP_ROOT_VALUE, false)

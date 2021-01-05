@@ -2,9 +2,8 @@ package machinehead.pushitweb.service
 
 import machinehead.pushitweb.constants.Constants.Companion.TEST_APP
 import machinehead.pushitweb.constants.Constants.Companion.TEST_PASSWORD
-import machinehead.pushitweb.entities.Application
-import machinehead.pushitweb.repositories.ApplicationRepository
-import org.assertj.core.api.Assertions
+import machinehead.pushitweb.entity.Application
+import machinehead.pushitweb.repository.ApplicationRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -32,7 +31,7 @@ class CertificateServiceTest {
 
     @Test
     fun `save a certificate based on multipart file`() {
-        val certificateFile = ClassPathResource("/cert/myKeystore.p12");
+        val certificateFile = ClassPathResource("/cert/myKeystore.p12")
         val myKeyStore = MockMultipartFile(
             certificateFile.filename!!,
             certificateFile.filename!!,
@@ -56,7 +55,7 @@ class CertificateServiceTest {
 
     @Test
     fun `don't accept certificate with invalid content type`() {
-        val certificateFile = ClassPathResource("/cert/myKeystore.p12");
+        val certificateFile = ClassPathResource("/cert/myKeystore.p12")
         val myKeyStore = MockMultipartFile(
             certificateFile.filename!!,
             certificateFile.filename!!,
@@ -78,7 +77,7 @@ class CertificateServiceTest {
 
     @Test
     fun `don't accept certificate with invalid app name`() {
-        val certificateFile = ClassPathResource("/cert/myKeystore.p12");
+        val certificateFile = ClassPathResource("/cert/myKeystore.p12")
         val myKeyStore = MockMultipartFile(
             certificateFile.filename!!,
             certificateFile.filename!!,
@@ -105,7 +104,7 @@ class CertificateServiceTest {
 
     @Test
     fun `don't accept certificate with invalid password`() {
-        val certificateFile = ClassPathResource("/cert/myKeystore.p12");
+        val certificateFile = ClassPathResource("/cert/myKeystore.p12")
         val myKeyStore = MockMultipartFile(
             certificateFile.filename!!,
             certificateFile.filename!!,
@@ -132,7 +131,7 @@ class CertificateServiceTest {
 
     @Test
     fun `don't accept certificate with invalid file content`() {
-        val certificateFile = ClassPathResource("/cert/myKeystore.p12");
+        val certificateFile = ClassPathResource("/cert/myKeystore.p12")
         val myKeyStore = MockMultipartFile(
             certificateFile.filename!!,
             certificateFile.filename!!,
@@ -160,7 +159,7 @@ class CertificateServiceTest {
 
     @Test
     fun `don't accept certificate with app name already in existence`() {
-        val certificateFile = ClassPathResource("/cert/myKeystore.p12");
+        val certificateFile = ClassPathResource("/cert/myKeystore.p12")
         val myKeyStore = MockMultipartFile(
             certificateFile.filename!!,
             certificateFile.filename!!,

@@ -3,8 +3,8 @@ package machinehead.pushitweb.security.config
 import machinehead.pushitweb.constants.Constants.Companion.TEST_PASSWORD
 import machinehead.pushitweb.constants.Constants.Companion.TEST_ROLE
 import machinehead.pushitweb.constants.Constants.Companion.TEST_USER
-import machinehead.pushitweb.entities.PushUser
-import machinehead.pushitweb.repositories.PushUserRepository
+import machinehead.pushitweb.entity.PushUser
+import machinehead.pushitweb.repository.PushUserRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given

@@ -3,10 +3,10 @@ package machinehead.pushitweb.service
 import java.util.*
 import java.lang.IllegalArgumentException
 import org.springframework.stereotype.Service
-import machinehead.pushitweb.entities.Application
+import machinehead.pushitweb.entity.Application
 import machinehead.pushitweb.logger
 import org.springframework.web.multipart.MultipartFile
-import machinehead.pushitweb.repositories.ApplicationRepository
+import machinehead.pushitweb.repository.ApplicationRepository
 import org.springframework.dao.DataIntegrityViolationException
 
 @Service

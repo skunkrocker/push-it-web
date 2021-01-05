@@ -1,7 +1,6 @@
 package machinehead.pushitweb.security.config
 
-import machinehead.pushitweb.repositories.PushUserRepository
-import org.springframework.security.authentication.AbstractAuthenticationToken
+import machinehead.pushitweb.repository.PushUserRepository
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -15,7 +14,7 @@ open class UserAuthenticationManager(private val pushUserRepository: PushUserRep
             val findByUserName = pushUserRepository.findByUserName(userName.toString())
 
             return@let findByUserName?.let { user ->
-                return UsernamePasswordAuthenticationToken(user.userName, user.password, listOf(GrantedAuthority { user.role }));
+                return UsernamePasswordAuthenticationToken(user.userName, user.password, listOf(GrantedAuthority { user.role }))
             }
         }
     }

@@ -1,11 +1,11 @@
-package machinehead.pushitweb.repositories
+package machinehead.pushitweb.repository
 
-import machinehead.pushitweb.entities.Application
-import machinehead.pushitweb.entities.PushUser
+import machinehead.pushitweb.entity.Application
+import machinehead.pushitweb.entity.PushUser
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
-import javax.transaction.Transactional;
+import javax.transaction.Transactional
 
 @Repository
 @Transactional

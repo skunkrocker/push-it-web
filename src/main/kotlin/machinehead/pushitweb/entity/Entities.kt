@@ -1,4 +1,4 @@
-package machinehead.pushitweb.entities
+package machinehead.pushitweb.entity
 
 import javax.persistence.*
 

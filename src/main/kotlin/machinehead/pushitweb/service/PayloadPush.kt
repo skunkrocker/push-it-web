@@ -2,7 +2,7 @@ package machinehead.pushitweb.service
 
 import machinehead.pushitweb.model.Payload
 import machinehead.pushitweb.model.PushResultApi
-import machinehead.pushitweb.repositories.ApplicationRepository
+import machinehead.pushitweb.repository.ApplicationRepository
 import machinehead.pushitweb.service.AppleNotificationServers.Companion.urlForStage
 import org.springframework.http.codec.ServerSentEvent
 import org.springframework.stereotype.Component
