@@ -1,5 +1,7 @@
 package machinehead.pushitweb.service
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import machinehead.pushitweb.gson
 import machinehead.pushitweb.logger
 import machinehead.pushitweb.model.APNSResponseApi
@@ -20,6 +22,10 @@ import java.io.IOException
 import java.lang.Exception
 import java.lang.IllegalArgumentException
 import java.util.concurrent.CountDownLatch
+import javax.xml.bind.JAXBElement
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
+import kotlin.coroutines.suspendCoroutine
 
 interface ApplePushNotificationService {
     fun push(payload: Payload): Flux<ServerSentEvent<PushResultApi>>
@@ -45,17 +51,26 @@ open class ApplePushNotificationImpl(
 
         logger.debug("Create the flux sink")
         return Flux.create<PushResultApi> { consumer ->
-            logger.debug("Flux sink was created, create the http client.")
-            httpClientService.httpClient(payload.appName, payload.headers) { httpClient ->
-                logger.debug("The httpClient was created., prepare and push.")
-                prepareAndPushPayload(payload, consumer, httpClient)
+            //run non blocking
+            GlobalScope.launch {
+
+                logger.debug("Flux sink was created, create the http client.")
+                httpClientService.httpClient(payload.appName, payload.headers) { httpClient ->
+
+                    logger.debug("The httpClient was created., prepare and push.")
+                    prepareAndPushPayload(payload, consumer, httpClient)
+                }
             }
         }.map { pushResultApi: PushResultApi? ->
             ServerSentEvent.builder<PushResultApi>().data(pushResultApi).build()
         }
     }
 
-    private fun prepareAndPushPayload(payload: Payload, consumer: FluxSink<PushResultApi?>, httpClient: OkHttpClient) {
+    private fun prepareAndPushPayload(
+        payload: Payload,
+        consumer: FluxSink<PushResultApi?>,
+        httpClient: OkHttpClient
+    ) {
 
         val countDownLatch = CountDownLatch(payload.tokens.size)
 
@@ -65,12 +80,16 @@ open class ApplePushNotificationImpl(
                 requestService.create(token, requestBody, payload.stage) { request ->
 
                     val responseCallback = PlatformCallback(token, countDownLatch, consumer = consumer)
+                    //let ok http client handle request threads
                     httpClient.newCall(request).enqueue(responseCallback)
-
                 }
             }
         }
         countDownLatch.await()
+        //dispose of consumer when all are done
+        consumer.complete()
+        //release http client resources when consumer done
+        httpClientService.releaseResources(httpClient)
     }
 }
 
