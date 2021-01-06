@@ -13,7 +13,7 @@ import reactor.core.publisher.Flux
 @Controller
 open class PushController(private val applePushNotificationService: ApplePushNotificationService) {
 
-    @PostMapping(value = ["/push"])
+    @PostMapping(value = ["/ios/push"])
     fun pushPayload(@RequestBody payload: Payload): Flux<ServerSentEvent<PushResultApi>> {
 
         return applePushNotificationService.push(payload)

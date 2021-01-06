@@ -2,7 +2,10 @@ package machinehead.pushitweb.service
 
 import machinehead.pushitweb.logger
 import machinehead.pushitweb.repository.ApplicationRepository
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import org.springframework.stereotype.Service
 import java.lang.IllegalStateException
 import java.security.KeyStore
@@ -19,9 +22,27 @@ interface HttpClientService {
      * Creates a [OkHttpClient] instance for the application name.
      *
      * @param appName the application name to which the payload will be pushed.
+     * @param headers Header map of headers to be inserted before the request is executed.
      * @param onCreated function called upon successful http client creation.
      */
-    fun httpClient(appName: String, onCreated: (httpClient: OkHttpClient) -> Unit)
+    fun httpClient(appName: String, headers: Map<String, Any>, onCreated: (httpClient: OkHttpClient) -> Unit)
+
+    /**
+     * Releases the resources the [OkHttpClient] instance is holding.
+     * @param httpClient The instance of [OkHttpClient] whose releases
+     */
+    fun releaseResources(httpClient: OkHttpClient?)
+}
+
+/**
+ * Service to create the [Interceptor.Chain] for the [OkHttpClient] where the headers are set before request.
+ */
+interface InterceptorChainService {
+    /**
+     * @param headers Header map of headers to be inserted before the request is executed.
+     * @return The [Interceptor.Chain] interface implementation where the headers are added.
+     */
+    fun createInterceptor(headers: Map<String, Any>): (Interceptor.Chain) -> Response
 }
 
 /**
@@ -41,12 +62,80 @@ interface CredentialsService {
 }
 
 @Service
-open class HttpClientServiceImpl(private val credentialsService: CredentialsService) : HttpClientService {
+open class HttpClientServiceImpl(
+    private val credentialsService: CredentialsService,
+    private val interceptorService: InterceptorChainService
+) : HttpClientService {
 
-    override fun httpClient(appName: String, onCreated: (httpClient: OkHttpClient) -> Unit) {
+    private val logger by logger()
+
+    override fun httpClient(appName: String, headers: Map<String, Any>, onCreated: (httpClient: OkHttpClient) -> Unit) {
 
         credentialsService.factoryAndTrustManager(appName) { factory: SSLSocketFactory, manager: X509TrustManager ->
+            logger.debug("The factory and manager were creaded")
+            createOkClient(headers, factory, manager) {
+                logger.debug("The ok client instance was created")
+                onCreated(it)
+            }
+        }
+    }
 
+    private fun createOkClient(
+        headers: Map<String, Any>,
+        factory: SSLSocketFactory,
+        manager: X509TrustManager,
+        onCreated: (httpClient: OkHttpClient) -> Unit
+    ) {
+        try {
+            val okClientBuilder = OkHttpClient().newBuilder()
+            logger.debug("ok client builder created")
+
+            okClientBuilder.sslSocketFactory(factory, manager)
+            logger.debug("added ssl factory and trust manager to the ok client builder")
+
+            okClientBuilder.addInterceptor(interceptorService.createInterceptor(headers))
+            logger.debug("ok client builder added request interceptor for headers")
+
+            val okClient = okClientBuilder.build()
+            logger.debug("ok client was built and will be returned")
+
+            onCreated(okClient)
+        } catch (e: Exception) {
+            logger.error("Could not create ok client. exception occurred: $e")
+            throw IllegalStateException("Could not create http client")
+        }
+    }
+
+    override fun releaseResources(httpClient: OkHttpClient?) {
+        val dispatcher = httpClient?.dispatcher
+        if (dispatcher?.queuedCallsCount() == 0 && dispatcher.runningCallsCount() == 0) {
+            httpClient.dispatcher.executorService.shutdownNow()
+            logger.debug("ok client executor service shutting down")
+            httpClient.connectionPool.evictAll()
+            logger.debug("ok client evict all from connection pool")
+            httpClient.cache?.close()
+            logger.debug("ok client clean cache")
+        }
+    }
+}
+
+@Service
+open class InterceptorChainServiceImpl : InterceptorChainService {
+
+    override fun createInterceptor(headers: Map<String, Any>): (Interceptor.Chain) -> Response {
+        return { chain: Interceptor.Chain ->
+            val original: Request = chain.request()
+            val responseBuilder: Request.Builder = original.newBuilder()
+
+            headers.forEach() {
+                responseBuilder.addHeader(it.key, it.value.toString())
+            }
+
+            val request = responseBuilder
+                .method(original.method, original.body)
+                .build()
+
+            chain.proceed(request)
         }
     }
 }

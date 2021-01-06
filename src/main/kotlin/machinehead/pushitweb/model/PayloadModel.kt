@@ -1,6 +1,7 @@
 package machinehead.pushitweb.model
 
 import com.google.gson.annotations.SerializedName
+import machinehead.pushitweb.gson
 import machinehead.pushitweb.service.Stage
 
 class Payload(
@@ -11,6 +12,18 @@ class Payload(
     var notification: Notification?,
     var custom: HashMap<String, Any>
 )
+
+fun Payload.notificationAsString(): String {
+    if (this.custom.isNotEmpty()) {
+        val notification = gson.toJsonTree(this.notification)
+        for (custom in this.custom) {
+            val toJsonTree = gson.toJsonTree(custom.value)
+            notification?.asJsonObject?.add(custom.key, toJsonTree)
+        }
+        return gson.toJson(notification).toString()
+    }
+    return gson.toJson(this.notification).toString()
+}
 
 data class Notification(var aps: Aps? = null)
 
